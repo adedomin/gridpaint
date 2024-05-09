@@ -1,7 +1,7 @@
 {
-  "name": "gridpaint",
+  "name": "gridpaint-ts",
   "type": "module",
-  "version": "6.2.1",
+  "version": "6.2.2",
   "description": "a canvas for creating grid-based art in the browser",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
