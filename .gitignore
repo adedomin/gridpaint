@@ -2,3 +2,4 @@ node_modules
 docs/index.bundle.js.map
 docs/index.bundle.js.LICENSE.txt
 dist/
+docs/dist

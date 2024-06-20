@@ -1,7 +1,7 @@
 {
   "name": "gridpaint-ts",
   "type": "module",
-  "version": "6.2.2",
+  "version": "6.2.3",
   "description": "a canvas for creating grid-based art in the browser",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -11,8 +11,8 @@
   "scripts": {
     "lint": "npx eslint index.ts lib/*.ts",
     "lint-fix": "npx eslint --fix index.ts lib/*.ts",
-    "prepack": "npx tsc && npx webpack-cli",
-    "test-browser": "xdg-open docs/index.html"
+    "prepack": "npx tsc && ln -s ../dist docs/dist",
+    "test-browser": "node bin/test-browser.js"
   },
   "repository": {
     "type": "git",
@@ -29,9 +29,9 @@
   "author": "Zorian Medwid <misterhat144@gmail.com>, Anthony DeDominic",
   "license": "LGPL-3.0+",
   "bugs": {
-    "url": "https://github.com/misterhat/gridpaint/issues"
+    "url": "https://github.com/adedomin/gridpaint/issues"
   },
-  "homepage": "https://github.com/misterhat/gridpaint#readme",
+  "homepage": "https://github.com/adedomin/gridpaint",
   "dependencies": {
     "pureimage": "^0.2.7"
   },
@@ -41,8 +41,6 @@
     "@typescript-eslint/parser": "^6.19.0",
     "eslint": "^8.56.0",
     "ts-loader": "^9.5.0",
-    "typescript": "^5.3.3",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+    "typescript": "^5.3.3"
   }
 }
