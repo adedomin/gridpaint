@@ -1,7 +1,7 @@
 {
   "name": "gridpaint-ts",
   "type": "module",
-  "version": "6.2.3",
+  "version": "6.2.3-nots",
   "description": "a canvas for creating grid-based art in the browser",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,7 +40,6 @@
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "eslint": "^8.56.0",
-    "ts-loader": "^9.5.0",
     "typescript": "^5.3.3"
   }
 }
