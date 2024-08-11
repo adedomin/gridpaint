@@ -28,6 +28,8 @@ import * as tools from './lib/tools.js';
 import * as resizers from './lib/resize.js';
 import { isBrowser } from './lib/browser.js';
 
+function noop(this: GridPaint): void {}
+
 const DEFAULT_PALETTE: string[] = [
     'transparent', '#fff', '#c0c0c0', '#808080', '#000',
     '#f00', '#800', '#ff0', '#808000', '#0f0', '#080',
@@ -105,16 +107,16 @@ class GridPaint {
             this.width * this.cellWidth,
             this.height * this.cellHeight,
         );
-        const ctx = this.canvas.getContext('2d');
-        if (ctx === null) {
-            throw new Error('Could not get 2d context');
-        }
-        this.ctx = ctx;
 
-        this.events = handlers.Handlers(this);
         this.resizeEvent = this.fitToWindow.bind(this);
+        this.events = handlers.Handlers(this);
 
         if (isBrowser) {
+            const ctx = this.canvas.getContext('2d');
+            if (ctx === null) {
+                throw new Error('Could not get 2d context');
+            }
+            this.ctx = ctx;
             this.canvas.className = 'gridpaint-canvas';
             this.canvas.style.cursor = 'crosshair';
             this.canvas.style.touchAction = 'none';
@@ -125,10 +127,13 @@ class GridPaint {
                 this.canvas.style.outlineStyle = 'solid';
                 this.canvas.style.outlineWidth = '2px';
             }
+        } else {
+            this.ctx = null as any;
         }
 
         // Used for requestAnimationFrame
         this.boundDraw = this.draw.bind(this);
+
         // init painting.
         this.clear(/* init */ true, /* default_color */ this.colour);
     }
@@ -202,20 +207,20 @@ class GridPaint {
     replace = tools.replace;
     compareChanges = tools.compare;
 
-    drawBackground = draw.background;
-    drawCursor = draw.cursor;
-    drawGrid = draw.grid;
-    drawPainting = draw.painting;
-    draw = draw.tick;
+    drawBackground = isBrowser ? draw.background : noop;
+    drawCursor = isBrowser ? draw.cursor : noop;
+    drawGrid = isBrowser ? draw.grid : noop;
+    drawPainting = isBrowser ? draw.painting : noop;
+    draw = isBrowser ? draw.tick : noop;
 
     saveAs = save;
 
-    attachHandlers = handlers.attach;
-    detachHandlers = handlers.detach;
+    attachHandlers = isBrowser ? handlers.attach : noop;
+    detachHandlers = isBrowser ? handlers.detach : noop;
 
     resize = resizers.resize;
     resizePainting = resizers.resizePainting;
-    fitToWindow = resizers.fitToWindow;
+    fitToWindow = isBrowser ? resizers.fitToWindow : noop;
 }
 
 export { GridPaint };

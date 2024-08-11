@@ -7,8 +7,6 @@
 import type { GridPaint as gp } from '../index.js';
 
 import { Canvas } from './canvas.js';
-import { PassThrough } from 'stream';
-import * as PImage from 'pureimage';
 import { isBrowser } from './browser.js';
 
 async function convertToPng(canvas: any): Promise<Buffer> {
@@ -68,7 +66,6 @@ function saveAs(blob: Blob, name: string) {
         click(a);
     }, 0);
 }
-
 
 /**
  * Export the painting to file.

@@ -3,7 +3,6 @@
 // See COPYING for License
 
 import type { GridPaint as gp } from '../index.js';
-import { isBrowser } from './browser.js';
 
 function clone_painting(painting: number[][]): number[][] {
     return Array.from(painting, el => el.slice());
@@ -72,8 +71,6 @@ function Handlers(that: gp): GridPaintHandlers {
 
 // activate event handlers
 function attach(this: gp): void {
-    if (!isBrowser) return;
-
     Object.keys(this.events).forEach(e => {
         this.canvas.addEventListener(
             e as GridPaintEventTargets,
@@ -89,8 +86,6 @@ function attach(this: gp): void {
 
 // remove all the event listeners & cease the draw loop
 function detach(this: gp): void {
-    if (!isBrowser) return;
-
     Object.keys(this.events).forEach(e => {
         this.canvas.removeEventListener(
             e as GridPaintEventTargets,

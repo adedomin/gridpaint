@@ -3,7 +3,6 @@
 // See COPYING for License
 
 import type { GridPaint as gp } from '../index.js';
-import { isBrowser } from './browser.js';
 
 /**
  * Resize the actual canvas and cell widths and heighs so they can fit to the parent window
@@ -102,7 +101,6 @@ function resizePainting(this: gp, w = 0, h = 0, default_colour = 0): void {
 }
 
 function fitToWindow(this: gp): void {
-    if (!isBrowser) return;
     if (!this.canvas.parentElement) return;
     const expectedWidth = this.origCellW * this.width;
     const aspectRatio = this.cellWidth / this.cellHeight;
