@@ -19,7 +19,7 @@ You can build/rebuild the example locally with:
 
 For an understanding of how to use GridPaint in the canvas, see:
 
-[examples/browser.js](./examples/browser.js);
+[docs/index.js](./docs/index.js);
 
 It contains documentation on how to use the canvas.
 
