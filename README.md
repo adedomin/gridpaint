@@ -2,7 +2,7 @@
 A canvas for creating grid-based art in the browser. gridpaint supports dynamic
 colour palettes and various tools such as bucket fill and undo.
 
-[![examples/browser.js demonstration](./example.png)](https://adedomin.github.io/gridpaint/docs/index.html)
+[![examples/browser.js demonstration](./example.png)](https://adedomin.github.io/gridpaint/index.html)
 
 *Click the image above to test a demonstration!*
 
