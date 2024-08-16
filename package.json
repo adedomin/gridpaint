@@ -11,7 +11,7 @@
   "scripts": {
     "lint": "npx eslint index.ts lib/*.ts",
     "lint-fix": "npx eslint --fix index.ts lib/*.ts",
-    "prepack": "npx tsc && ln -s ../dist docs/dist",
+    "prepack": "npx tsc && ln -sft docs ../dist",
     "test-browser": "node bin/test-browser.js"
   },
   "repository": {

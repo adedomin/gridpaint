@@ -1,22 +1,14 @@
 // Copyright (C) 2016  Zorian Medwin
 // Copyright (C) 2021  Anthony DeDominic
 // See COPYING for License
-
-
-
 import type { GridPaint as gp } from '../index.js';
 
 import { Canvas } from './canvas.js';
 import { isBrowser } from './browser.js';
 
-async function convertToPng(canvas: any): Promise<Buffer> {
-    const passThroughStream = new PassThrough();
-    const pngData: Buffer[] = [];
-
-    passThroughStream.on('data', (chunk: Buffer) => pngData.push(chunk));
-    passThroughStream.once('end', function() {});
-    await PImage.encodePNGToStream(canvas, passThroughStream);
-    return Buffer.concat(pngData);
+let makePng: (gp: gp) => ArrayBuffer;
+if (!isBrowser) {
+    makePng = (await import('./node/png.js')).makePng;
 }
 
 /**
@@ -73,8 +65,7 @@ function saveAs(blob: Blob, name: string) {
  * @param [file='painting.png'] The file name.
  * @param [scale=1]             How big to make the image.
  */
-function save(this: gp, file = 'painting.png', scale = 1):
-Promise<null|Blob|Buffer> {
+function save(this: gp, file = 'painting.png', scale = 1): Promise<null|Blob> | ArrayBuffer {
     const exported: HTMLCanvasElement = Canvas(
         this.width * this.cellWidth,
         this.height * this.cellHeight,
@@ -112,8 +103,7 @@ Promise<null|Blob|Buffer> {
         }
     }
     else {
-        // file in this nonbrowser context should be a write stream
-        return convertToPng((eCtx as any).bitmap);
+        return makePng(this);
     }
     return Promise.resolve(null);
 }

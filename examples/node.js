@@ -1,5 +1,8 @@
+#!/usr/bin/env node
+
 'use strict';
 import { GridPaint } from '../dist/index.js';
+import { writeFile } from 'node:fs/promises';
 
 const painter = new GridPaint({ width: 10, height: 10, cellWidth: 16 });
 const strokes = [
@@ -27,4 +30,5 @@ strokes.forEach(function (a) {
     painter.action();
 });
 
-painter.saveAs('node.png');
+const img = painter.saveAs('node.png');
+writeFile('node.png', img).catch(console.error);

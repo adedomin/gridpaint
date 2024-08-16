@@ -21,6 +21,7 @@ else {
         return {
             width: width || 300,
             height: height || 150,
+            getContext: () => {},
         } as any;
     };
 }
