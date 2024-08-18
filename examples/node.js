@@ -31,4 +31,5 @@ strokes.forEach(function (a) {
 });
 
 const img = painter.saveAs('node.png');
-writeFile('node.png', img).catch(console.error);
+console.log(img);
+writeFile('node.png', new Uint8Array(img)).catch(console.error);
