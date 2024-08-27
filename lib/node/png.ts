@@ -5,9 +5,9 @@ import { concatArrayBuffers } from './buf_helper.js';
 
 import { deflateSync, constants } from 'node:zlib';
 // .PNG....
-const MAGIC = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+const MAGIC = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
 // ....IEND....
-const IEND = Buffer.from([0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82]);
+const IEND = new Uint8Array([0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82]);
 
 function chunkNameToInt(str: string): number {
   return Array
@@ -104,7 +104,7 @@ function makeIDAT(
   const h = image?.length;
   const pixfmt_width_w_filter = w * cw + 1;
   if (w == undefined || h == undefined) {
-    return deflateSync(Buffer.alloc(0));
+    return deflateSync(new ArrayBuffer(0));
   }
   const thirtytwoB = palette.length > 0xFF;
 
