@@ -66,6 +66,8 @@ function saveAs(blob: Blob, name: string) {
  * @param [scale=1]             How big to make the image.
  */
 function save(this: gp, file = 'painting.png', scale = 1): Promise<null|Blob> | ArrayBuffer {
+    if (!isBrowser) return makePng(this);
+
     const exported: HTMLCanvasElement = Canvas(
         this.width * this.cellWidth,
         this.height * this.cellHeight,
@@ -77,33 +79,27 @@ function save(this: gp, file = 'painting.png', scale = 1): Promise<null|Blob> | 
             '<GridPaint>#save() -> Could not get 2d Context.',
         );
     }
-
     this.drawPainting(scale, eCtx);
 
-    if (isBrowser) {
-        if (file === ':blob:') {
-            return new Promise(resolve => {
-                exported.toBlob(blob => {
-                    resolve(blob);
-                }, 'image/png');
-            });
-        }
-        else {
+    if (file === ':blob:') {
+        return new Promise(resolve => {
             exported.toBlob(blob => {
-                if (blob !== null) {
-                    saveAs(blob, file);
-                }
-                else {
-                    console.error('<GridPaint>#save() -> Blob should not be null!');
-                    return Promise.reject(
-                        '<GridPaint>#save() -> Blob should not be null!',
-                    );
-                }
+                resolve(blob);
             }, 'image/png');
-        }
+        });
     }
     else {
-        return makePng(this);
+        exported.toBlob(blob => {
+            if (blob !== null) {
+                saveAs(blob, file);
+            }
+            else {
+                console.error('<GridPaint>#save() -> Blob should not be null!');
+                return Promise.reject(
+                    '<GridPaint>#save() -> Blob should not be null!',
+                );
+            }
+        }, 'image/png');
     }
     return Promise.resolve(null);
 }

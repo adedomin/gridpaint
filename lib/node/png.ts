@@ -1,19 +1,18 @@
 import type { GridPaint as gp } from '../../index.js';
 import { cssColorValueToUint32 } from './color.js';
 import { crc32 } from './crc32.js';
+import { concatArrayBuffers } from './buf_helper.js';
 
 import { deflateSync, constants } from 'node:zlib';
-import { Buffer } from 'node:buffer';
 // .PNG....
 const MAGIC = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
 // ....IEND....
 const IEND = Buffer.from([0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82]);
 
-
 function chunkNameToInt(str: string): number {
   return Array
     .from(str, (chr, i) => chr.charCodeAt(0) << ((3-i) * 8))
-    .reduce((acc, num) => acc | num, 0);
+    .reduce((acc, num) => acc | num, 0) | 0;
 }
 
 const PngTypes = {
@@ -25,16 +24,23 @@ const PngTypes = {
 } as const;
 type PngType = (typeof PngTypes)[keyof typeof PngTypes];
 
-function encodePngChunk(type: PngType, data: Buffer): Buffer {
-  const buf = Buffer.alloc(8 /* length + header name */);
-  buf.writeUInt32BE(data.length, 0);
-  buf.writeUInt32BE(type, 4);
+function encodePngChunk(type: PngType, data: ArrayBuffer): ArrayBuffer {
+  const head = new ArrayBuffer(8 /* length + header name */);
+  { 
+    const view = new DataView(head);
+    view.setUint32(0, data.byteLength | 0);
+    view.setUint32(4, type | 0);
+  }
+
   // calc CRC, note that length is not a part of the CRC
-  const crc = crc32(Buffer.concat([buf.subarray(4), data]));
-  console.log(crc);
-  const crcB = Buffer.alloc(4);
-  crcB.writeUint32BE(crc);
-  return Buffer.concat([buf, data, crcB]);
+  const crc = crc32(new Uint8Array(concatArrayBuffers([head.slice(4), data])));
+  const crcB = new ArrayBuffer(4);
+  {
+    const view = new DataView(crcB);
+    view.setUint32(0, crc | 0);
+  }
+
+  return concatArrayBuffers([head, data, crcB]);
 }
 
 const COLOR_PALETTE = 0x3;
@@ -43,39 +49,46 @@ const WIDTH_OFF = 0;
 const HEIGHT_OFF = 4;
 const BITDEPTH_OFF = 8;
 const COLORTYPE_OFF = 9;
-function makeIHDR(w: number, h: number, paletteLen: number): Buffer  {
-  const buf = Buffer.alloc(13);
-  buf.writeUInt32BE(w, WIDTH_OFF);
-  buf.writeUInt32BE(h, HEIGHT_OFF);
-  buf.writeUInt8(8, BITDEPTH_OFF);
+function makeIHDR(w: number, h: number, paletteLen: number): ArrayBuffer  {
+  const buf = new ArrayBuffer(13);
+  const view = new DataView(buf);
+  view.setUint32(WIDTH_OFF, w | 0);
+  view.setUint32(HEIGHT_OFF, h | 0);
+  view.setUint8(BITDEPTH_OFF, 8 | 0);
   if (paletteLen > 0xFF) {
-    buf.writeUInt8(COLOR_RGBA, COLORTYPE_OFF);
+    view.setUint8(COLORTYPE_OFF, COLOR_RGBA | 0);
   } else {
-    buf.writeUInt8(COLOR_PALETTE, COLORTYPE_OFF);
+    view.setUint8(COLORTYPE_OFF, COLOR_PALETTE | 0);
   }
   return encodePngChunk(PngTypes.IHDR, buf);
 }
 
-function makePallete(palette: number[]): Buffer {
-  const buf = Buffer.alloc(palette.length * 3 /* 24bit color */ + 1 /* we trim this byte off */);
-  let i = 0;
-  for (let color of palette) {
-    // we will shingle these bad boys on so we avoid 16 + 8 setters.
-    buf.writeUInt32BE(color, i);
-    i += 3; // palette colors are 24bit RGB.
+function makePallete(palette: number[]): ArrayBuffer {
+  const buf = new ArrayBuffer(palette.length * 3 /* 24bit color */ + 1 /* we trim this byte off */);
+  {
+    const view = new DataView(buf);
+    let i = 0;
+    for (let color of palette) {
+      // we will shingle these bad boys on so we avoid 16 + 8 setters.
+      view.setUint32(i, color | 0);
+      i += 3; // palette colors are 24bit RGB.
+    }
   }
-  const buf_trunc = buf.subarray(0, buf.length - 1);
+  const buf_trunc = buf.slice(0, buf.byteLength - 1);
   const plte = encodePngChunk(PngTypes.PLTE, buf_trunc);
   
-  const buf2 = Buffer.alloc(palette.length);
-  i = 0;
-  for (let color of palette) {
-    buf2.writeUInt8(color & 0xFF, i);
-    i += 1; // transparencies are only the 8bit alpha channel
+  const buf2 = new ArrayBuffer(palette.length);
+  {
+    const view = new DataView(buf2);
+    let i = 0;
+    for (let color of palette) {
+      view.setUint8(i, color & 0xFF);
+      i += 1; // transparencies are only the 8bit alpha channel
+    }
   }
   const trns = encodePngChunk(PngTypes.tRNS, buf2);
 
-  return Buffer.concat([plte, trns]);
+  return concatArrayBuffers([plte, trns]);
 }
 
 function idx1Dto2D(x: number, y: number, width: number): number {
@@ -86,30 +99,36 @@ function makeIDAT(
   palette: number[],
   image: number[][],
   cw: number, ch: number
-): Buffer {
+): ArrayBuffer {
   const w = image[0]?.length;
   const h = image?.length;
+  const pixfmt_width_w_filter = w * cw + 1;
   if (w == undefined || h == undefined) {
     return deflateSync(Buffer.alloc(0));
   }
+  const thirtytwoB = palette.length > 0xFF;
 
-  let tw = w * cw;
-  let th = h * ch;
-  const buf = palette.length > 0xFF ? Buffer.alloc(tw * th * 4) : Buffer.alloc(tw * th);
+  const totlen = w * h * cw * ch * (thirtytwoB ? 4 : 1) + (ch * h) /* filter bytes */;
+  const buf = new ArrayBuffer(totlen);
+  const view = new DataView(buf);
+  // note we have to offset the offset by +1 to leave the filter bit unchanged (0 or NoFilter)
+  const viewx = thirtytwoB
+    ? (idx: number, val: number) => view.setUint32(idx * 4 + 1, val)
+    : (idx: number, val: number) => view.setUint8(idx + 1, val);
+
   for (let y = 0; y < h; ++y) {
     for (let x = 0; x < w; ++x) {
       const color_idx = image[y][x];
       const color = palette[color_idx];
-
+      const value = palette.length > 0xFF ? color : color_idx;
+      
       const ystart = y * ch;
       const xstart = x * cw;
-      for (let py = ystart; py < (ystart + ch); ++py) {
-        for (let px = xstart; px < (xstart + cw); ++px) {
-          if (palette.length > 0xFF) {
-            buf.writeUInt32BE(color, idx1Dto2D(px, py, w * cw) * 4);
-          } else {
-            buf.writeUInt8(color_idx, idx1Dto2D(px, py, w * cw));
-          }
+      const yend = ystart + ch;
+      const xend = xstart + cw;
+      for (let py = ystart; py < yend; ++py) {
+        for (let px = xstart; px < xend; ++px) {
+          viewx(idx1Dto2D(px, py, pixfmt_width_w_filter), value | 0);
         }
       }
     }
@@ -120,7 +139,7 @@ function makeIDAT(
   return encodePngChunk(PngTypes.IDAT, bufz);
 }
 
-export function makePng(gp: gp): Buffer {
+export function makePng(gp: gp): ArrayBuffer {
   const palette = gp.palette.slice().map(cssColorValueToUint32);
   const ihdr = new Uint8Array(makeIHDR(gp.width * gp.cellWidth, gp.height * gp.cellHeight, palette.length));
   if (palette.length > 0xFF) {
@@ -128,13 +147,13 @@ export function makePng(gp: gp): Buffer {
       palette, gp.painting,
       gp.cellWidth, gp.cellHeight
     );
-    return Buffer.concat([MAGIC, ihdr, idat, IEND]);
+    return concatArrayBuffers([MAGIC, ihdr, idat, IEND]);
   } else {
     const plte_trns = makePallete(palette);
     const idat = makeIDAT(
       palette, gp.painting,
       gp.cellWidth, gp.cellHeight
     );
-    return Buffer.concat([MAGIC, ihdr, plte_trns, idat, IEND]);
+    return concatArrayBuffers([MAGIC, ihdr, plte_trns, idat, IEND]);
   }
 }

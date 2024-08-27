@@ -4,7 +4,7 @@
 import { GridPaint } from '../dist/index.js';
 import { writeFile } from 'node:fs/promises';
 
-const painter = new GridPaint({ width: 10, height: 10, cellWidth: 16 });
+const painter = new GridPaint({ width: 10, height: 10, cellWidth: 16, cellHeight: 16 });
 const strokes = [
     { x: 1, y: 1 },
     { x: 2, y: 1 },
@@ -31,5 +31,4 @@ strokes.forEach(function (a) {
 });
 
 const img = painter.saveAs('node.png');
-console.log(img);
 writeFile('node.png', new Uint8Array(img)).catch(console.error);
