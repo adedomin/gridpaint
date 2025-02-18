@@ -1,28 +1,27 @@
 function splitCSSColorFun(str: string): number[] {
-    function* scan(str: string): Generator<number, undefined, undefined> {
-        start: for (let i = 0; i < str.length; ++i) {
-            const chr = str.charCodeAt(i);
-            if (chr > 47 && chr < 59) {
-                for (let j = i; j < str.length; ++j) {
-                    const chr = str.charCodeAt(j);
-                    if (!(chr > 47 && chr < 59) && !(chr === 46 || chr == 37)) {
-                        yield parseFloat(str.slice(i, j));
-                        i = j + 1;
-                        continue start;
-                    }
-                    else if (chr == 37) { // parse CSS percent colors (alpha usually).
-                        const num = parseFloat(str.slice(i, j));
-                        yield num / 100;
-                        i = j + 1;
-                        continue start;
-                    }
+    let ret = [];
+    start: for (let i = 0; i < str.length; ++i) {
+        const chr = str.charCodeAt(i);
+        if (chr > 47 && chr < 58) {
+            for (let j = i; j < str.length; ++j) {
+                const chr = str.charCodeAt(j);
+                if (!(chr > 47 && chr < 58) && !(chr === 46 || chr == 37)) {
+                    ret.push(parseFloat(str.slice(i, j)));
+                    i = j; // loop increment will still trigger on continue
+                    continue start;
                 }
-                yield parseFloat(str.slice(i));
-                break start;
+                else if (chr == 37) { // parse CSS percent colors (alpha usually).
+                    const num = parseFloat(str.slice(i, j));
+                    ret.push(num / 100);
+                    i = j; // loop increment will still trigger on continue
+                    continue start;
+                }
             }
+            ret.push(parseFloat(str.slice(i)));
+            break start;
         }
     }
-    return [...scan(str)];
+    return ret;
 }
 
 const HSL_EXTRACT = {
