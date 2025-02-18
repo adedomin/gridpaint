@@ -10,10 +10,7 @@
             "es6",
             "dom"
         ],
-        "paths": {
-            "*": [ "./node_modules/*" ]
-        },
-        "allowJs": true
+        "allowJs": false
     },
     "include": [ "./lib/*", "./index.ts" ]
 }
