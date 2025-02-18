@@ -32,9 +32,6 @@
     "url": "https://github.com/adedomin/gridpaint/issues"
   },
   "homepage": "https://github.com/adedomin/gridpaint",
-  "dependencies": {
-    "pureimage": "^0.2.7"
-  },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "@types/node": "^22.2.0",

@@ -127,7 +127,8 @@ class GridPaint {
                 this.canvas.style.outlineStyle = 'solid';
                 this.canvas.style.outlineWidth = '2px';
             }
-        } else {
+        }
+        else {
             this.ctx = null as any;
         }
 
