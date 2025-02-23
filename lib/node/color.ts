@@ -1,24 +1,12 @@
 function splitCSSColorFun(str: string): number[] {
-    let ret = [];
-    start: for (let i = 0; i < str.length; ++i) {
-        const chr = str.charCodeAt(i);
-        if (chr > 47 && chr < 58) {
-            for (let j = i; j < str.length; ++j) {
-                const chr = str.charCodeAt(j);
-                if (!(chr > 47 && chr < 58) && !(chr === 46 || chr == 37)) {
-                    ret.push(parseFloat(str.slice(i, j)));
-                    i = j; // loop increment will still trigger on continue
-                    continue start;
-                }
-                else if (chr == 37) { // parse CSS percent colors (alpha usually).
-                    const num = parseFloat(str.slice(i, j));
-                    ret.push(num / 100);
-                    i = j; // loop increment will still trigger on continue
-                    continue start;
-                }
-            }
-            ret.push(parseFloat(str.slice(i)));
-            break start;
+    const ret = [];
+    for (const { groups } of str.matchAll(/(?<num>\d+([.]\d+)?(?<percent>%)?)/g)) {
+        if (groups?.percent != null) {
+            const n = parseFloat(groups.num);
+            ret.push(n / 100);
+        }
+        else if (groups?.num != null) {
+            ret.push(parseFloat(groups.num));
         }
     }
     return ret;
