@@ -1,7 +1,7 @@
 {
   "name": "gridpaint-ts",
   "type": "module",
-  "version": "7.0.1-nodrag",
+  "version": "7.0.2-nodrag",
   "description": "a canvas for creating grid-based art in the browser",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
