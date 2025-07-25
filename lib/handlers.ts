@@ -28,6 +28,12 @@ type GridPaintEventTargets =
 type GridPaintHandlers =
     Record<GridPaintEventTargets, (e: PointerEvent) => void>;
 
+// prevent the browser from allowing you to drag the canvas while drawing near edges.
+function dragstart(e: DragEvent): boolean {
+    e.preventDefault();
+    return false;
+}
+
 function Handlers(that: gp): GridPaintHandlers {
     // bind useful drawing functions
     const action = that.action.bind(that);
@@ -81,6 +87,7 @@ function attach(this: gp): void {
 
     // in case the user drags away from the canvas element
     window.addEventListener('pointerup', this.events.pointerup, false);
+    window.addEventListener('dragstart', dragstart, false);
     window.addEventListener('resize', this.resizeEvent, false);
 }
 
@@ -95,6 +102,7 @@ function detach(this: gp): void {
     });
 
     window.removeEventListener('pointerup', this.events.pointerup, false);
+    window.removeEventListener('dragstart', dragstart, false);
     window.removeEventListener('resize', this.resizeEvent, false);
 }
 
