@@ -30,7 +30,6 @@ type GridPaintHandlers =
 
 // prevent the browser from allowing you to drag the canvas while drawing near edges.
 function dragstart(e: DragEvent): boolean {
-    console.warn('dragged');
     e.preventDefault();
     return false;
 }
