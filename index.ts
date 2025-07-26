@@ -163,11 +163,16 @@ class GridPaint {
 
     /** Perform the current tool's action on the painting.
         This should ideally be invoked only by an event handler. */
-    action(): void {
+    action(pointermove?: boolean): void {
         switch (this.tool) {
         case 'pencil': return this.pencil();
         case 'bucket': return this.bucket();
-        case 'line':   return this.line();
+        case 'line':
+            if (!pointermove) return this.line();
+            break;
+        case 'bezier':
+            if (!pointermove) return this.line(/* cancel */ false, /* bezier */ true);
+            break;
         default:
             console.error(
                 '<GridPaint>#action() warning: Unknown tool selected: ' +

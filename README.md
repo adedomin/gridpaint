@@ -88,7 +88,7 @@ Apply the current tool, at the current painter.cursor, to the canvas.
 Only GridPaintActionTools can be used:
 ```typescript
 type GridPaintActionTools =
-    'pencil' | 'bucket' | 'line';
+    'pencil' | 'bucket' | 'line' | 'bezier';
 ```
 
 Usage example:

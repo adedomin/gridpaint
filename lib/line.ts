@@ -4,26 +4,44 @@
 import type { GridPaint as gp } from '../index.js';
 
 /** Stateful global for holding the start of a line drawing */
-const previous_point: gp['cursor'] = { x: -1, y: -1 };
+const control_points: ReadonlyArray<gp['cursor']> = [ { x: -1, y: -1 }, { x: -1, y: -1} ];
+
+
+const STATE = {
+    unset: 0,
+    line: 1,
+    bezier: 2,
+} as const;
+type StateEnum = typeof STATE[keyof typeof STATE];
 
 /**
  * Detect if we are drawing a line or not
  * -1 being a sigil value indicating unset.
+ *
+ * @returns STATE.unset  if no control point set.
+ *          STATE.line   if line control point set.
+ *          STATE.bezier if quadratic bezier point set.
  */
-function isPrevUnset(): boolean {
-    return previous_point.x === -1 || previous_point.y === -1;
+function currentState(): StateEnum {
+    if (control_points[0].x === -1 && control_points[0].y === -1) {
+        return STATE.unset;
+    }
+    else if (control_points[1].x === -1 && control_points[1].y === -1) {
+        return STATE.line;
+    }
+    else {
+        return STATE.bezier;
+    }
 }
 
 /**
- * Function to set the global line start state of this module.
- * Given the function no parameters sets it back to default: (-1, -1).
- *
- * @param x the x value of the start of the line
- * @param y the y value of the start of the line
+ * clear the state of the control points.
  */
-function setPrev(x = -1, y = -1): void {
-    previous_point.x = x;
-    previous_point.y = y;
+function clear(): void {
+    for (let i = 0; i < control_points.length; ++i) {
+        control_points[i].x = -1;
+        control_points[i].y = -1;
+    }
 }
 
 /**
@@ -37,12 +55,13 @@ function setPrev(x = -1, y = -1): void {
 function* line_approx(x: number, y: number): Generator<
     gp['cursor'], undefined, undefined
 > {
-    if (isPrevUnset()) {
+    switch (currentState()) {
+    case STATE.unset:
         yield { x, y };
-    }
-    else {
-        let x1 = previous_point.x;
-        let y1 = previous_point.y;
+        break;
+    case STATE.line: {
+        let x1 = control_points[0].x;
+        let y1 = control_points[0].y;
         const x2 = x;
         const y2 = y;
         const dx = Math.abs(x2 - x1);
@@ -64,42 +83,54 @@ function* line_approx(x: number, y: number): Generator<
             }
         }
         yield { x: x1, y: y1 };
+        break;
     }
-    return;
+    case STATE.bezier: {
+        const x1 = control_points[0].x;
+        const x2 = control_points[1].x;
+        const y1 = control_points[0].y;
+        const y2 = control_points[1].y;
+        for (let t = 0.0; t <= 1.0; t += 0.005) {
+            const xp = (Math.pow(1 - t, 2) * x1) + (2 * (1 - t) * t * x2) + (Math.pow(t, 2) * x);
+            const yp = (Math.pow(1 - t, 2) * y1) + (2 * (1 - t) * t * y2) + (Math.pow(t, 2) * y);
+            yield { x: Math.round(xp), y: Math.round(yp) };
+        }
+        break;
+    }
+    }
 }
 
 /**
- * Draws a Line from start to finish.
+ * Draws a Line or Quadratic Bezier curve from start to finish.
  *
- * This function has two states:
- *   - starting, where previous_point is unset.
- *   - ending,   where previous_point is set.
- * Initially the function is in the starting state.
+ * This function is stateful has two to three states:
+ *   - No control points set:  unset
+ *   - One control point set:  line
+ *   - Two control points set: bezier
+ * Initially the function is in the unset state.
+ * When done drawing the line or curve, it returns to the unset state.
+ * You can reset the state at any time by passing `true` as the first argument to this function.
  *
- * When called in starting state, the current cursor position
- * will be saved and will transition to the ending state.
- *
- * When called in the ending state, the function will draw
- * to the canvas an approximate line from the starting cursor
- * state and the current cursor location.
- *
- * An optional parameter can be passed to reset the state back to start
- *
- * @param cancel If true or truthy,
- *               it will cancel the starting line coordinates.
+ * @param cancel If truthy, it will cancel the starting line coordinates.
+ * @param bezier If truthy, it will draw a bezier curve instead of a line.
  */
-function line(this: gp, cancel?: boolean): void {
-    if (cancel) return setPrev();
+function line(this: gp, cancel?: boolean, bezier?: boolean): void {
+    if (cancel) return clear();
 
-    if (isPrevUnset()) {
-        setPrev(this.cursor.x, this.cursor.y);
-        return;
+    const s = currentState();
+    if (s === STATE.unset) {
+        control_points[0].x = this.cursor.x;
+        control_points[0].y = this.cursor.y;
+    }
+    else if (s === STATE.line && bezier) {
+        control_points[1].x = this.cursor.x;
+        control_points[1].y = this.cursor.y;
     }
     else {
         for (const { x, y } of line_approx(this.cursor.x, this.cursor.y)) {
             this.painting[y][x] = this.colour;
         }
-        setPrev();
+        clear();
     }
 }
 

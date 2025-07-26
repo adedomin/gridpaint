@@ -46,7 +46,7 @@ function Handlers(that: gp): GridPaintHandlers {
         pointermove(e: PointerEvent) {
             e.preventDefault();
             calcPos(e);
-            if (that.isApplied) action();
+            if (that.isApplied) action(true);
         },
         pointerdown(e: PointerEvent) {
             if (e.button !== 0) return;

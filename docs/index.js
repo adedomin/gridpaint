@@ -59,7 +59,7 @@ document.body.appendChild(d);
 d = document.createElement('div');
 
 // These are all the tools that have an associated GridPaint#action() or #singleAction(tool)
-actions = [ 'pencil', 'line', 'bucket', 'undo', 'redo', 'clear', 'clear-with', 'saveAs' ];
+actions = [ 'pencil', 'line', 'bezier', 'bucket', 'undo', 'redo', 'clear', 'clear-with', 'saveAs' ];
 // Like the color picking, you are on your own for tool picking.
 actions.forEach(function (action) {
     const b = document.createElement('button');
@@ -72,6 +72,7 @@ actions.forEach(function (action) {
         // action() these unless you are drawing something for the user.
         case 'pencil':
         case 'line':
+        case 'bezier':
         case 'bucket':
             // If you assign directly to tool, you will need
             // to consider clearing any pending line drawing state.

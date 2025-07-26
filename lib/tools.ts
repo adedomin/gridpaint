@@ -72,7 +72,7 @@ function compare(this: gp): void {
 // These tools have action()'s
 // as in mousedown cause them to edit the canvas
 type GridPaintActionTools =
-    'pencil' | 'bucket' | 'line';
+    'pencil' | 'bucket' | 'line' | 'bezier';
 type GridPaintTools =
     'clear' | 'clear-with' | 'undo'  | 'redo';
 
