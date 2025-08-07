@@ -5,7 +5,7 @@ let isBrowser = false;
 if (typeof process === 'undefined') {
     isBrowser = true;
 }
-else if (process?.title === 'browser') {
+else if (globalThis.process?.title === 'browser') {
     isBrowser = true;
 }
 

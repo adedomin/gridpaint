@@ -4,12 +4,8 @@
 
 import type { GridPaint as gp } from '../index.js';
 
-// Empty all of the grid units.
-// Technically also initializes painting and oldPainting
+// Set all grid elements to a given color or initialize the painting.
 function clear(this: gp, init = false, default_colour = 0): void {
-    // Have to preserve array, empties it in-place.
-    // Also backs up the array, by setting it to oldPainting
-    // this is for undo history
     this.oldPainting = this.painting.splice(0, this.painting.length);
     for (let i = 0; i < this.height; ++i) {
         this.painting.push([]);
@@ -18,7 +14,6 @@ function clear(this: gp, init = false, default_colour = 0): void {
         }
     }
     if (init) this.oldPainting = this.painting;
-    this.line(/* cancel any line action */ true);
     this.compareChanges();
 }
 

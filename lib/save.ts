@@ -23,7 +23,7 @@ function click(node: HTMLElement) {
     try {
         node.dispatchEvent(new MouseEvent('click'));
     }
-    catch (e) {
+    catch {
         const evt = document.createEvent('MouseEvents');
         evt.initMouseEvent(
             'click', true, true, window, 0, 0, 0, 80,

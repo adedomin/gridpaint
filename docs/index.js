@@ -6,31 +6,24 @@ import { GridPaint } from './dist/index.js';
 const painter = new GridPaint({ width: 40, height: 20 });
 let d, actions, f, t, b;
 
-// GridPaint#canvas is always an HTMLCanvasElement or in node, it's a faux one
-// That supports getting a 2d context.
-//
-// You are on your own in terms of attaching it to the dom and managing it.
-// GridPaint#destroy() will detach all event listeners
+// GridPaint#canvas is always an HTMLCanvasElement or in node, a fake one.
+// You must attach the canvas somewhere.
 document.body.appendChild(painter.canvas);
+
 d = document.createElement('div');
 d.style.marginBottom = '6px';
-
-// You need to bring your own color picker for the canvas
-// you have in the painter.
-// This uses the default defined in GridPaint since
-// one was not explicitly given
-// An array of type string[] where string is a valid css color.
-// The painter uses an index into the palette to set an internal
-// array which is used to render the appropriate colors onto a canvas
-painter.palette.forEach(function (colour, i) {
+// The library does not provide widgets for color picking or tool use and selection.
+// below is an example of creating a color picker.
+// the painter has a concept of a default palette, which we're using here.
+// If you want customer colors, you can define them as an array of css color-like strings.
+painter.palette.forEach(function (colour, i /* palette index, needed for painter.colour */) {
     const b = document.createElement('button');
-    // How you display your colors in the pickers is on you
-    // Here I just use them as css colors, or in the transparent case
-    // my own checkered pattern
     if (colour !== 'transparent') {
+        // your palette should be a list of valid css colors.
         b.style.backgroundColor = colour;
     }
     else {
+        // transparency checkerboard.
         b.style.backgroundImage = `
           linear-gradient(45deg, #999 25%, transparent 25%, transparent 75%, #999 75%, #999 100%),
           linear-gradient(-45deg, #999 25%, #666 25%, #666 75%, #999 75%, #999 100%)
@@ -42,8 +35,8 @@ painter.palette.forEach(function (colour, i) {
     b.style.color = 'white';
     b.innerText = '\xA0';
     b.title = 'switch to ' + colour;
-    b.onclick = function () {
-        // where colour is an index into GridPaint#palette
+    b.addEventListener('click', function () {
+        // GridPaint#colour property is an index into the palette array.
         painter.colour = i;
         // When out of the canvas, GridPaint#drawing is false.
         // The painter only updates when your mouse
@@ -51,7 +44,7 @@ painter.palette.forEach(function (colour, i) {
         // This causes it to draw the currently selected
         // colour so the user knows their colour is selected.
         if (!painter.drawing) painter.draw();
-    };
+    });
     d.appendChild(b);
 });
 
@@ -60,32 +53,28 @@ d = document.createElement('div');
 
 // These are all the tools that have an associated GridPaint#action() or #singleAction(tool)
 actions = [ 'pencil', 'line', 'bezier', 'bucket', 'undo', 'redo', 'clear', 'clear-with', 'saveAs' ];
-// Like the color picking, you are on your own for tool picking.
 actions.forEach(function (action) {
     const b = document.createElement('button');
     b.innerText = action;
-    b.onclick = function () {
+    b.addEventListener('click', function () {
         switch (action) {
-        // These first three tools (pencil, line, bucket)
-        // should only be applied by the pointerdown/move
-        // event handler, it makes little sense to manually
-        // action() these unless you are drawing something for the user.
+        // These tools should only be set and not directly triggered.
+        // They're intended to be triggered by the pointer events.
+        // You can trigger them with GridPaint#action() if you need to
+        // draw something for the user.
         case 'pencil':
         case 'line':
         case 'bezier':
         case 'bucket':
-            // If you assign directly to tool, you will need
-            // to consider clearing any pending line drawing state.
+            // setTool takes care of clearing the line/bezier module's global state.
             painter.setTool(action);
             break;
+        // These tools are not handled by pointer events in the canvas.
+        // They should be triggered by the user's use of a widget.
         case 'undo':
         case 'redo':
         case 'clear':
         case 'clear-with':
-            // The remaining tools, sans saveAs
-            // generally should not be invoked on mousedown
-            // so the function GridPaint#singleAction() exists
-            // that takes the tool's name
             painter.singleAction(action);
             // When out of the canvas, GridPaint#drawing is false.
             // These tools transform the underlying painting
@@ -99,7 +88,7 @@ actions.forEach(function (action) {
             // of a file name and should be invoked like this.
             painter.saveAs(/* filename */);
         }
-    };
+    });
     d.appendChild(b);
 });
 

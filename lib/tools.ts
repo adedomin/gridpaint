@@ -12,7 +12,8 @@ import type { GridPaint as gp } from '../index.js';
 const MAX_HISTORY = 64;
 
 function clone_painting(painting: number[][]): number[][] {
-    return Array.from(painting, el => el.slice());
+    // no argument is actually slower.
+    return Array.from(painting, el => el.slice(0));
 }
 
 function pushHistory(this: gp, top: number[][][], bottom: number[][][]): void {

@@ -1,7 +1,7 @@
 {
   "name": "gridpaint-ts",
   "type": "module",
-  "version": "7.1.0-bezier",
+  "version": "7.1.1",
   "description": "a canvas for creating grid-based art in the browser",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,11 +33,11 @@
   },
   "homepage": "https://github.com/adedomin/gridpaint",
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.2",
+    "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.2.0",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.3"
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "eslint": "^9.32.0",
+    "typescript": "^5.8.3"
   }
 }
