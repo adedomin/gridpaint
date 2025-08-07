@@ -1,4 +1,4 @@
-'use strict';
+
 
 import { GridPaint } from './dist/index.js';
 

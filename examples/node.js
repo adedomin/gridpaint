@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-'use strict';
+
 import { GridPaint } from '../dist/index.js';
 import { writeFile } from 'node:fs/promises';
 

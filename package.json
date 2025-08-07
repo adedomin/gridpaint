@@ -9,8 +9,8 @@
     "dist/*"
   ],
   "scripts": {
-    "lint": "npx eslint index.ts lib/*.ts lib/node/*.ts",
-    "lint-fix": "npx eslint --fix index.ts lib/*.ts lib/node/*.ts",
+    "lint": "npx eslint",
+    "lint-fix": "npx eslint --fix",
     "prepack": "npx tsc && ln -sft docs ../dist",
     "test-browser": "node bin/test-browser.js"
   },
