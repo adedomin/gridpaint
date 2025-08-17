@@ -72,6 +72,7 @@ class GridPaint {
     gridColour = '#000';
     palette: string[] = DEFAULT_PALETTE;
     cursor = { x: -1, y: -1 };
+    control_points: ReadonlyArray<this['cursor']> =  [ { x: -1, y: -1 }, { x: -1, y: -1 } ];
     painting: number[][] = [[]];
     // Clear tool backup for redo/undo
     oldPainting: number[][] = [[]];
