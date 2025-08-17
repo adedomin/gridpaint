@@ -5,7 +5,7 @@
 import type { GridPaint as gp } from '../index.js';
 
 function clone_painting(painting: number[][]): number[][] {
-    return Array.from(painting, el => el.slice());
+    return Array.from(painting, el => el.slice(0));
 }
 
 function calcPosition(this: gp, e: PointerEvent) {
