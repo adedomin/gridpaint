@@ -30,4 +30,22 @@ function replace(this: gp, old: number|string, replace: number|string): void {
     this.compareChanges();
 }
 
-export { replace };
+// replace the painting property with one made by the user, properly resizes. should be called early.
+// note this deletes history.
+function replacePainting(this: gp, painting: gp['painting']): void {
+    const newh = painting.length;
+    const neww = painting[0].length;
+    this.painting = painting;
+    if (newh !== this.height) {
+        this.height = newh;
+        this.canvas.height = this.height * this.cellHeight;
+    }
+    if (neww !== this.width) {
+        this.width = neww;
+        this.canvas.width = this.width * this.cellWidth;
+    }
+    this.undoHistory.length = 0;
+    this.redoHistory.length = 0;
+}
+
+export { replace, replacePainting };

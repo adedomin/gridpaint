@@ -80,6 +80,7 @@ interface GridPaintOptions {
     outline?: boolean,
     grid?: boolean,
     colour?: number,
+    onchange?: (this: Gridpaint) => void,
 }
 ```
 ### painter.action()
@@ -165,7 +166,15 @@ The function will attempt to center the existing content in the painting.
 Any new cells will be initialized with the colour of `default_colour`.
 If `default_colour` is not specified, `0` is used.
 
-Notes: undo and redo may grow or shrink your `painting` so be careful carrying
+Notes: undo and redo grow or shrink your `painting` if the historical painting was bigger or smaller.
+
+### painter.replacePainting(painting)
+This function can be used to safely resize your painting
+such that the canvas is resized along with the painting.
+
+Generally this should be called early, such as after construction.
+
+Notes: this function does not reuse references to painter.painting.
 
 ### painter.saveAs([file, scale])
 Export the painting as a PNG file.

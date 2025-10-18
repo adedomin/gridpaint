@@ -4,7 +4,7 @@
 
 import { bucket } from './bucket.js';
 import { clear, clearWith } from './clear.js';
-import { replace } from './replace.js';
+import { replace, replacePainting } from './replace.js';
 import { line, line_approx } from './line.js';
 
 import type { GridPaint as gp } from '../index.js';
@@ -36,7 +36,6 @@ function pushHistory(this: gp, top: number[][][], bottom: number[][][]): void {
         this.width = oldw;
         this.canvas.width = this.width * this.cellWidth;
     }
-
 }
 
 // activated when the user's finger or mouse is pressed
@@ -54,9 +53,7 @@ function apply(this: gp, isApplied?: boolean): void {
     }
 }
 
-/** compared oldPainting to painting & push the changes to history
- * @param state any object that returns on undo/redo.
- */
+/** compared oldPainting to painting & push the changes to history */
 function compare(this: gp): void {
     if (this.oldPainting.length === this.painting.length) {
         if (this.painting.every((el, i) => el.toString() === this.oldPainting[i].toString())) {
@@ -67,6 +64,8 @@ function compare(this: gp): void {
     this.undoHistory.push(clone_painting(this.oldPainting));
     this.undoHistory.splice(0, this.undoHistory.length - MAX_HISTORY);
     this.redoHistory.length = 0;
+    // let consumer know it changed.
+    this.onchange();
 }
 
 
@@ -121,6 +120,7 @@ export {
     /* These do not have "action()'s" */
     apply,
     replace,
+    replacePainting,
     compare,
     line_approx,
 };

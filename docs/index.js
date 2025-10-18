@@ -4,12 +4,13 @@ import { GridPaint } from './dist/index.js';
 
 // SEE GridPaintOptions for all valid options and their types
 const painter = new GridPaint({ width: 40, height: 20 });
-let d, actions, f, t, b;
+let d, b;
 
 // GridPaint#canvas is always an HTMLCanvasElement or in node, a fake one.
 // You must attach the canvas somewhere.
 document.body.appendChild(painter.canvas);
 
+// palette buttons.
 d = document.createElement('div');
 d.style.marginBottom = '6px';
 // The library does not provide widgets for color picking or tool use and selection.
@@ -49,10 +50,12 @@ painter.palette.forEach(function (colour, i /* palette index, needed for painter
 });
 
 document.body.appendChild(d);
+
+// Tool controls
 d = document.createElement('div');
 
 // These are all the tools that have an associated GridPaint#action() or #singleAction(tool)
-actions = [ 'pencil', 'line', 'bezier', 'bucket', 'undo', 'redo', 'clear', 'clear-with', 'saveAs' ];
+let actions = [ 'pencil', 'line', 'bezier', 'bucket', 'undo', 'redo', 'clear', 'clear-with', 'saveAs' ];
 actions.forEach(function (action) {
     const b = document.createElement('button');
     b.innerText = action;
@@ -93,10 +96,12 @@ actions.forEach(function (action) {
 });
 
 document.body.appendChild(d);
+
+// Replace controls
 d = document.createElement('div');
 
-f = document.createElement('select');
-t = document.createElement('select');
+const f = document.createElement('select');
+const t = document.createElement('select');
 b = document.createElement('button');
 
 b.innerText = 'replace';
@@ -120,6 +125,42 @@ d.appendChild(f);
 d.appendChild(t);
 d.appendChild(b);
 document.body.appendChild(d);
+
+// onchange tester
+d = document.createElement('div');
+let ocp = document.createElement('p');
+let chk = document.createElement('input');
+
+ocp.innerText = 'Session Persist\xA0';
+ocp.style = 'display: inline-block; margin: 0; padding: 0;';
+
+chk.type = 'checkbox';
+chk.onclick = function(e) {
+    if (e.target.checked) {
+        // use localStorage in your code if you want it to last a bit longer.
+        sessionStorage.setItem('painting', JSON.stringify(painter.painting));
+        painter.onchange = function() {
+            sessionStorage.setItem('painting', JSON.stringify(painter.painting));
+        };
+    }
+    else {
+        sessionStorage.clear();
+        painter.onchange = function() {};
+    }
+};
+
+let savedPainting = sessionStorage.getItem('painting');
+if (savedPainting !== null) {
+    painter.replacePainting(JSON.parse(savedPainting));
+    chk.click();
+}
+
+d.appendChild(ocp);
+d.appendChild(chk);
+
+document.body.appendChild(d);
+
+// Resize controls
 d = document.createElement('div');
 
 const pw = document.createElement('p');
